@@ -1,0 +1,17 @@
+---
+import site from '../data/site.json';
+
+const proximo = site.encontros[0];
+const definido = Boolean(proximo?.data_iso);
+const resumo = definido
+  ? `${proximo.data} · ${proximo.hora} · ${proximo.local}`
+  : `${proximo?.data ?? 'Próximo encontro'} · data, horário e local a definir`;
+---
+
+<aside class="faixa-encontro" aria-label="Próximo encontro">
+  <div class="container faixa-encontro__inner">
+    <span class="faixa-encontro__label">Primeiro encontro</span>
+    <span>{resumo}</span>
+    <a class="faixa-encontro__link" href="/encontros">detalhes →</a>
+  </div>
+</aside>

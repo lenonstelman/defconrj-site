@@ -1,0 +1,77 @@
+---
+/* ============================================================
+   DCG5521 — ASCII ART CRISTO REDENTOR (ASSET VERSION)
+   Port exato de components/dcg-cristo-hero.tsx.
+   Única adaptação: de full-viewport (100vw/100vh) para quadro
+   embutido — moldura criada para a página /sobre.
+   ============================================================ */
+---
+
+<section class="hero-cristo">
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="scan-bar" aria-hidden="true"></div>
+
+  <div class="corner-marks" aria-hidden="true">
+    <div class="cm cm-tl"></div>
+    <div class="cm cm-tr"></div>
+    <div class="cm cm-bl"></div>
+    <div class="cm cm-br"></div>
+  </div>
+
+  {/* Imagem base */}
+  <img
+    src="/assets/cristo-ascii-art.png"
+    alt="Cristo Redentor ASCII"
+    class="cristo-img"
+    loading="lazy"
+  />
+
+  {/* Glitch layers */}
+  <img
+    src="/assets/cristo-ascii-art.png"
+    alt=""
+    class="glitch-layer gl-red"
+    aria-hidden="true"
+  />
+  <img
+    src="/assets/cristo-ascii-art.png"
+    alt=""
+    class="glitch-layer gl-gray"
+    aria-hidden="true"
+  />
+
+  {/* HUD */}
+  <div class="hud-overlay" aria-hidden="true">
+    <div class="hud-tl">
+      <div>
+        <span class="hud-label">TARGET</span> CORCOVADO
+      </div>
+      <div>
+        <span class="hud-label">LAT</span> -22.9519° S
+      </div>
+      <div>
+        <span class="hud-label">LNG</span> -43.2105° W
+      </div>
+      <div>
+        <span class="hud-label">ALT</span> 709 MSL
+      </div>
+    </div>
+    <div class="hud-br">
+      <div class="hud-val">DCG5521</div>
+      <div>RIO DE JANEIRO</div>
+      <div>
+        <span class="hud-val">SINCE 1931</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="circuit-line" aria-hidden="true"></div>
+  <div class="circuit-node" aria-hidden="true"></div>
+
+  <div class="status-line">
+    ◉ <span class="st-red">ASCII_RENDER</span> // CORCOVADO.DCG5521 // FRAME_RATE: 24FPS //{' '}
+    <span class="st-red">MONITORING</span>
+  </div>
+</section>

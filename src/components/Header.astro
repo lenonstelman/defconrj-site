@@ -1,0 +1,43 @@
+---
+import site from '../data/site.json';
+
+const atual = Astro.url.pathname;
+const itens = [
+  { href: '/', label: 'Início' },
+  { href: '/encontros', label: 'Encontros' },
+  { href: '/sobre', label: 'Sobre' },
+  { href: '/conduta', label: 'Conduta' },
+];
+
+const ativo = (href: string) =>
+  href === '/' ? atual === '/' : atual.startsWith(href);
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="logo" href="/" aria-label={`${site.nome_publico} — página inicial`}>
+      <img src="/assets/marca/logo-defcon-rj.png" alt="" width="40" height="40" />
+      DCG<span>5521</span>
+    </a>
+    <nav aria-label="Navegação principal">
+      <ul class="menu">
+        {
+          itens.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={[{ ativo: ativo(item.href) }]}
+                aria-current={ativo(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a class="btn" href="/contato">Participe</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

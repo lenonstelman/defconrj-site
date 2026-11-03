@@ -1,0 +1,246 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+
+const { encontros, recorrencia, nome_publico, sigla } = site;
+const proximo = encontros[0];
+
+const eventJsonLd = proximo.data_iso
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      name: `${nome_publico} Meetup — ${proximo.tema}`,
+      startDate: proximo.data_iso,
+      location: { '@type': 'Place', name: proximo.local },
+      organizer: { '@type': 'Organization', name: `${nome_publico} (${sigla})` },
+      eventStatus: 'https://schema.org/EventScheduled',
+      isAccessibleForFree: true,
+    }
+  : null;
+---
+
+<Base
+  title="Encontros — DEF CON Rio de Janeiro (DCG5521)"
+  description="Próximo encontro do DEF CON Rio de Janeiro (DCG5521): data, hora, local e tema. Entrada gratuita, sem inscrição — é só aparecer."
+>
+  {eventJsonLd && <script type="application/ld+json" set:html={JSON.stringify(eventJsonLd)} />}
+
+  <section class="meetups-section">
+    <div class="bg-scanlines" aria-hidden="true"></div>
+    <div class="bg-noise" aria-hidden="true"></div>
+
+    <div class="meetups-content">
+      {/* Header */}
+      <div class="meet-header">
+        <div class="meet-prompt">
+          <span class="p-user">root</span>@dcg5521:
+          <span class="p-path">~/meetups</span>${' '}
+          <span class="p-cmd">cat schedule.txt</span>
+        </div>
+        <h1 class="meet-title" data-text="ENCONTROS DA COMUNIDADE">
+          ENCONTROS DA COMUNIDADE
+        </h1>
+        <div class="meet-sub">Agenda: {recorrencia}</div>
+      </div>
+
+      {/* Próximo encontro */}
+      <div class="next-meetup">
+        <span class="corner corner-tl" aria-hidden="true"></span>
+        <span class="corner corner-tr" aria-hidden="true"></span>
+        <span class="corner corner-bl" aria-hidden="true"></span>
+        <span class="corner corner-br" aria-hidden="true"></span>
+        <div class="card-scan" aria-hidden="true"></div>
+
+        <div class="meet-card-content">
+          <div class="node-row">
+            <span class="node-dot" aria-hidden="true"></span>
+            <span class="node-id">PROXIMO_ENCONTRO</span>
+          </div>
+          <div class="card-prompt">
+            <span class="cp-user">root</span>@dcg5521:
+            <span class="cp-path">~/meetups/next</span>${' '}
+            <span class="cp-cmd">./dump_event.sh --upcoming</span>
+          </div>
+
+          <div class="meet-data-grid">
+            <div class="data-cell">
+              <div class="d-label">Data</div>
+              <div class="d-value">{proximo.data}</div>
+            </div>
+            <div class="data-cell">
+              <div class="d-label">Hora</div>
+              <div class="d-value">{proximo.hora}</div>
+            </div>
+            <div class="data-cell">
+              <div class="d-label">Local</div>
+              <div class="d-value accent">{proximo.local}</div>
+            </div>
+            <div class="data-cell">
+              <div class="d-label">Tema</div>
+              <div class="d-value">{proximo.tema}</div>
+            </div>
+          </div>
+
+          <div class="meet-divider"></div>
+
+          <div class="meet-meta">
+            <div class="meta-block">
+              <div class="m-label">Quem Apresenta</div>
+              <div class="m-value">A definir</div>
+            </div>
+            <div class="meta-block">
+              <div class="m-label">O Que Levar</div>
+              <div class="m-value">Nada obrigatório. Notebook se quiser. Cadeado se tiver.</div>
+            </div>
+          </div>
+
+          <div class="meet-actions">
+            {site.links.discord && <a href={site.links.discord} target="_blank" rel="noopener noreferrer" class="m-action">▶ ACOMPANHAR NO DISCORD</a>}
+            {site.links.telegram && <a href={site.links.telegram} target="_blank" rel="noopener noreferrer" class="m-action">▶ ACOMPANHAR NO TELEGRAM</a>}
+          </div>
+        </div>
+      </div>
+
+      {/* Nota */}
+      <div class="meet-note">
+        <span class="note-icon" aria-hidden="true">ⓘ</span>
+        <p class="note-text">
+          Não precisa se inscrever pra aparecer.{' '}
+          <strong>A confirmação é só pra gente acertar o tamanho da pizza.</strong>
+        </p>
+      </div>
+
+      {/* Primeira vez (man page) */}
+      <div class="first-time-section">
+        <div class="first-time-header">
+          <span class="ft-icon">$</span>
+          <span class="ft-title">PRIMEIRA_VEZ(1)</span>
+        </div>
+        <div class="man-page">
+          <div class="man-header">
+            <span>DCG5521 Manual</span>
+            <span>PRIMEIRA_VEZ(1)</span>
+            <span>2026</span>
+          </div>
+          <div class="man-body">
+            <div class="man-name">PRIMEIRA_VEZ(1) — DCG5521 Community Manual</div>
+            <div class="man-section">SYNOPSIS</div>
+            <div class="man-desc">
+              primeira_vez [ --chegar_cedo ] [ --procurar_camiseta ] [
+              --falar_que_e_novo ]
+            </div>
+
+            <div class="man-section">DESCRIPTION</div>
+            <div class="man-desc">
+              Se é sua primeira vez no DCG5521, relaxa. Chega no começo, procura a
+              camiseta do grupo e fala que é novo.
+            </div>
+
+            <div class="man-section">NOTES</div>
+            <ul class="man-list">
+              <li>
+                Ninguém morde — o que a gente disseca em laboratório já morde por
+                todos.
+              </li>
+              <li>
+                Não precisa saber nada prévio. A comunidade é aberta a todos os
+                níveis.
+              </li>
+              <li>
+                Se não tiver notebook, não tem problema. A maioria dos encontros é
+                prática com hardware compartilhado.
+              </li>
+            </ul>
+
+            <div class="man-tip">
+              TIP: Levanta a mão e pergunta. A única pergunta burra é a que não foi
+              feita.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Arquivo (filesystem Linux) */}
+      <div class="archive-section">
+        <div class="archive-header">
+          <span class="ar-icon">$</span>
+          <span class="ar-title">ARQUIVO</span>
+        </div>
+
+        <div class="fs-window">
+          <div class="fs-titlebar">
+            <span class="fs-dot r" aria-hidden="true"></span>
+            <span class="fs-dot y" aria-hidden="true"></span>
+            <span class="fs-dot g" aria-hidden="true"></span>
+            <span class="fs-title">dcg5521@rio: /var/log/meetups/archive</span>
+          </div>
+
+          <div class="fs-body">
+            <div class="fs-prompt">
+              <span class="fp-user">root</span>@dcg5521:
+              <span class="fp-path">~/meetups/archive</span>${' '}
+              <span class="p-cmd">ls -la</span>
+            </div>
+
+            <table class="fs-ls">
+              <tbody>
+                <tr>
+                  <td class="ls-perm">drwxr-xr-x</td>
+                  <td class="ls-owner">dcg5521</td>
+                  <td class="ls-owner">community</td>
+                  <td class="ls-size">4.0K</td>
+                  <td class="ls-date">—</td>
+                  <td class="ls-name dir">2026/</td>
+                </tr>
+                <tr>
+                  <td class="ls-perm">-rw-r--r--</td>
+                  <td class="ls-owner">dcg5521</td>
+                  <td class="ls-owner">community</td>
+                  <td class="ls-size">0</td>
+                  <td class="ls-date">—</td>
+                  <td class="ls-name file">README.md</td>
+                </tr>
+                <tr>
+                  <td class="ls-perm">lrwxrwxrwx</td>
+                  <td class="ls-owner">dcg5521</td>
+                  <td class="ls-owner">community</td>
+                  <td class="ls-size">12</td>
+                  <td class="ls-date">—</td>
+                  <td class="ls-name link">latest -&gt; aguardando primeiro encontro</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="fs-empty">
+              <span class="empty-cmd">$</span> find ./archive -type f -name "*.log"
+              <br />
+              <br />
+              <span class="fs-empty-l1">Nenhum encontro arquivado ainda.</span>
+              <br />
+              <span class="fs-empty-l2">O histórico aparece aqui, agrupado por ano e mês.</span>
+            </div>
+
+            <div class="fs-prompt fs-prompt--fim">
+              <span class="fp-user">root</span>@dcg5521:
+              <span class="fp-path">~/meetups/archive</span>${' '}
+              <span class="p-cmd">_</span>
+            </div>
+          </div>
+
+          <div class="fs-footer">
+            root@dcg5521:~/meetups/archive$
+            <span class="fs-cursor" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Circuito de base */}
+      <div class="circuit-base" aria-hidden="true">
+        <div class="cb-line"></div>
+        <div class="cb-node" style="left: 25%"></div>
+        <div class="cb-node" style="left: 50%; animation-delay: 0.7s"></div>
+        <div class="cb-node" style="left: 75%; animation-delay: 1.4s"></div>
+      </div>
+    </div>
+  </section>
+</Base>

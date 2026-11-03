@@ -1,0 +1,87 @@
+---
+import '../styles/brand.css';
+import site from '../data/site.json';
+import NextMeeting from '../components/NextMeeting.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/assets/og.png', Astro.site);
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={`${site.nome_publico} (${site.sigla})`} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/png" href="/assets/favicon.png" />
+    <link rel="apple-touch-icon" href="/assets/favicon.png" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="preload" href="/fonts/archivo-black-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/space-grotesk-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <NextMeeting />
+    <Header />
+    <main id="conteudo">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // Scramble estilo "hyper text" no hover dos botões
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const GLIFO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*@';
+        document.querySelectorAll('.btn').forEach((el) => {
+          const original = el.textContent ?? '';
+          let rodando = false;
+          el.addEventListener('mouseenter', () => {
+            if (rodando) return;
+            rodando = true;
+            let quadro = 0;
+            const total = Math.max(14, original.length * 1.5);
+            const timer = setInterval(() => {
+              quadro++;
+              const resolvidas = Math.floor((quadro / total) * original.length);
+              el.textContent = original
+                .split('')
+                .map((c, i) =>
+                  /\s/.test(c)
+                    ? c
+                    : i < resolvidas
+                      ? c
+                      : GLIFO[Math.floor(Math.random() * GLIFO.length)],
+                )
+                .join('');
+              if (quadro >= total) {
+                clearInterval(timer);
+                el.textContent = original;
+                rodando = false;
+              }
+            }, 28);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

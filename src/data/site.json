@@ -1,0 +1,26 @@
+{
+  "nome_publico": "DEF CON Rio de Janeiro",
+  "sigla": "DCG5521",
+  "recorrencia": "encontros mensais — próxima edição em novembro de 2026",
+  "encontros": [
+    {
+      "data": "Novembro de 2026",
+      "hora": "a definir",
+      "local": "a definir",
+      "tema": "Primeiro encontro — tema a definir",
+      "data_iso": "",
+      "sev": "INFO",
+      "type": "meetup",
+      "coords": "-22.9068, -43.1729",
+      "description": "Primeiro encontro do DCG5521. A data exata, o horário, o local e o tema serão divulgados em breve nos canais oficiais."
+    }
+  ],
+  "links": {
+    "discord": "https://discord.gg/tQVbADjUx",
+    "telegram": "https://t.me/+IjTSuW2xtp9mMmE5",
+    "instagram": "",
+    "linkedin": "https://www.linkedin.com/company/defcon-rio-de-janeiro",
+    "github": "https://github.com/dcg5521",
+    "email": ""
+  }
+}

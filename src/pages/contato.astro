@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+
+const { links } = site;
+const canais = [
+  { nome: 'Discord', label: 'Principal', descricao: 'Onde a conversa acontece: avisos de encontro, CTF, projetos e ajuda técnica.', href: links.discord, cta: 'Entrar no Discord' },
+  { nome: 'Telegram', label: 'Avisos rápidos', descricao: 'Lembretes de encontro e conversa com a comunidade.', href: links.telegram, cta: 'Entrar no Telegram' },
+  { nome: 'LinkedIn', label: 'Rede profissional', descricao: 'Acompanhe as novidades e atividades do grupo.', href: links.linkedin, cta: 'Acessar LinkedIn' },
+  { nome: 'GitHub', label: 'Código e projetos', descricao: 'Repositórios e iniciativas da comunidade.', href: links.github, cta: 'Acessar GitHub' },
+  { nome: 'Instagram', label: 'Redes sociais', descricao: 'Acompanhe os canais sociais do grupo.', href: links.instagram, cta: 'Acessar Instagram' },
+].filter((canal) => Boolean(canal.href));
+---
+
+<Base
+  title="Participe — DEF CON Rio de Janeiro (DCG5521)"
+  description="Fale com o DEF CON Rio de Janeiro (DCG5521) pelos canais oficiais da comunidade."
+>
+  <div class="container pagina">
+    <p class="label">Contato</p>
+    <h1>Participe</h1>
+
+    <ul class="cards" role="list">
+      {canais.map((canal, index) => (
+        <li class="card card--cta">
+          <p class="label">{canal.label}</p>
+          <h2>{canal.nome}</h2>
+          <p>{canal.descricao}</p>
+          <a class={index === 0 ? 'btn' : 'btn btn--ghost'} href={canal.href} target="_blank" rel="noopener noreferrer">{canal.cta}</a>
+        </li>
+      ))}
+      {links.email && (
+        <li class="card card--cta">
+          <p class="label">Contato direto</p>
+          <h2>E-mail</h2>
+          <p>Fale diretamente com o ponto de contato do grupo.</p>
+          <a class="btn btn--ghost" href={`mailto:${links.email}`}>{links.email}</a>
+        </li>
+      )}
+    </ul>
+
+    <section class="secao" aria-labelledby="palestrar">
+      <h2 id="palestrar">Quero palestrar</h2>
+      <div class="box">
+        <p>
+          Todo encontro tem espaço pra você: lightning talk de 10 minutos ou talk de
+          40 com demo ao vivo. Não precisa ser especialista — precisa ser curioso e
+          querer dividir.
+        </p>
+        {links.email && (
+          <p class="card__links">
+            <a href={`mailto:${links.email}?subject=${encodeURIComponent('Quero palestrar — [título da talk]')}`}>
+              Propor uma talk por e-mail →
+            </a>
+          </p>
+        )}
+      </div>
+    </section>
+
+    <section class="secao" aria-labelledby="imprensa">
+      <h2 id="imprensa">Imprensa ou órgão público</h2>
+      <div class="box">
+        <p>
+          O DEF CON Rio de Janeiro é um grupo aberto e legal. Encontros públicos,
+          anunciados aqui, abertos a qualquer pessoa — incluindo imprensa e área
+          pública, desde que identificadas. Foto e gravação de participantes só com
+          consentimento explícito.
+        </p>
+      </div>
+    </section>
+
+    <section class="secao" aria-labelledby="patrocinio">
+      <h2 id="patrocinio">Quero patrocinar</h2>
+      <div class="box">
+        <p>
+          Pizza, espaço, brindes. Em troca: agradecimento público — nunca dados de
+          participantes.
+        </p>
+      </div>
+    </section>
+  </div>
+</Base>

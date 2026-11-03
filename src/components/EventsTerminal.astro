@@ -1,0 +1,177 @@
+---
+/* ============================================================
+   DCG5521 — PRÓXIMOS ENCONTROS (Terminal Log)
+   Portado de components/dcg5521-events-terminal.tsx
+   Dados: src/data/site.json
+   ============================================================ */
+import site from '../data/site.json';
+
+const eventos = site.encontros;
+const proximo = eventos[0];
+const diasAte = proximo?.data_iso
+  ? Math.ceil(
+      (new Date(proximo.data_iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    )
+  : null;
+---
+
+<section class="events-terminal" id="encontros" aria-labelledby="titulo-proximos">
+  <div class="term-window">
+    {/* Titlebar */}
+    <div class="term-titlebar">
+      <span class="term-dot r" aria-hidden="true"></span>
+      <span class="term-dot y" aria-hidden="true"></span>
+      <span class="term-dot g" aria-hidden="true"></span>
+      <span class="term-title">dcg5521@rio: /var/log/meetups.log</span>
+      <span class="term-live">
+        <span class="live-pip" aria-hidden="true"></span>
+        LIVE
+      </span>
+    </div>
+
+    {/* Header */}
+    <div class="term-header">
+      <div class="term-prompt">
+        <span class="p-user">root</span><span class="p-sep">@</span><span class="p-host">dcg5521</span><span class="p-sep">:</span><span class="p-path">~/events</span><span class="p-sep">$</span>
+        <span class="p-cmd">tail -f meetups.log</span>
+      </div>
+      <h2 class="term-h1" id="titulo-proximos">
+        PRÓXIMOS <span>ENCONTROS</span>
+      </h2>
+    </div>
+
+    {/* Status bar */}
+    <div class="term-status">
+      <span class="stat-item">
+        eventos: <span class="stat-val">{eventos.length}</span>
+      </span>
+      <span class="stat-item">
+        próximo:{' '}
+        <span class="stat-val accent" data-dias data-iso={proximo?.data_iso ?? ''}>
+          {diasAte === null ? `${proximo?.data ?? 'a definir'} · data a definir` : diasAte > 0 ? `${diasAte} dias` : 'HOJE'}
+        </span>
+      </span>
+      <span class="stat-item">
+        local: <span class="stat-val">Rio de Janeiro</span>
+      </span>
+      <span class="stat-item">
+        coord: <span class="stat-val">-22.9068, -43.1729</span>
+      </span>
+      <span class="stat-item">
+        uptime: <span class="stat-val" data-uptime>00:00:00</span>
+      </span>
+    </div>
+
+    {/* Logs */}
+    <div class="term-logs">
+      {
+        eventos.map((ev, idx) => (
+          <>
+            <div
+              class="log-entry"
+              role="button"
+              tabindex="0"
+              aria-expanded="false"
+              aria-controls={`detalhes-ev-${idx}`}
+            >
+              <div class="log-ts">
+                <span class="ts-date">{ev.data}</span> <span class="ts-time">{ev.hora}</span>
+              </div>
+              <span class={`log-sev sev-${ev.sev.toLowerCase()}`}>{ev.sev}</span>
+              <div class="log-body">
+                <div class="log-host">
+                  [<span class="h-name">dcg5521</span>@{ev.type}]
+                </div>
+                <div class="log-title">{ev.tema}</div>
+                <div class="log-meta">
+                  <span>
+                    <span class="m-icon">⚒</span> {ev.local}
+                  </span>
+                  <span>
+                    <span class="m-icon">📍</span> {ev.coords}
+                  </span>
+                </div>
+              </div>
+              <span class="log-cursor" aria-hidden="true">▶</span>
+            </div>
+
+            <div class="log-details" id={`detalhes-ev-${idx}`}>
+              <p class="detail-desc">{ev.description}</p>
+              <div class="detail-actions">
+                <a href="/encontros" class="d-action">
+                  🔗 detalhes
+                </a>
+
+              </div>
+            </div>
+          </>
+        ))
+      }
+    </div>
+
+    {/* Footer */}
+    <div class="term-footer">
+      <span class="f-cmd">
+        root@dcg5521:~/events$
+        <span class="f-cursor" aria-hidden="true"></span>
+      </span>
+      <span>scroll para mais</span>
+    </div>
+  </div>
+
+  <script>
+    const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---------- Uptime ----------
+    if (!reduzMovimento) {
+      const elUptime = document.querySelector('[data-uptime]');
+      if (elUptime) {
+        let segundos = 0;
+        setInterval(() => {
+          segundos++;
+          const h = String(Math.floor(segundos / 3600)).padStart(2, '0');
+          const m = String(Math.floor((segundos % 3600) / 60)).padStart(2, '0');
+          const s = String(segundos % 60).padStart(2, '0');
+          elUptime.textContent = `${h}:${m}:${s}`;
+        }, 1000);
+      }
+    }
+
+    // ---------- Contagem de dias (recalculada no cliente) ----------
+    const elDias = document.querySelector('[data-dias]');
+    if (elDias?.dataset.iso) {
+      const dias = Math.ceil(
+        (new Date(elDias.dataset.iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+      );
+      elDias.textContent = dias > 0 ? `${dias} dias` : 'HOJE';
+    }
+
+    // ---------- Expandir/colapsar entradas ----------
+    document.querySelectorAll('.log-entry').forEach((entrada) => {
+      const alternar = () => {
+        const detalhes = document.getElementById(entrada.getAttribute('aria-controls'));
+        const estavaAtiva = entrada.classList.contains('active');
+
+        document.querySelectorAll('.log-entry.active').forEach((e) => {
+          e.classList.remove('active');
+          e.setAttribute('aria-expanded', 'false');
+        });
+        document.querySelectorAll('.log-details.open').forEach((d) => d.classList.remove('open'));
+
+        if (!estavaAtiva) {
+          entrada.classList.add('active');
+          entrada.setAttribute('aria-expanded', 'true');
+          detalhes?.classList.add('open');
+        }
+      };
+
+      entrada.addEventListener('click', alternar);
+      entrada.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          alternar();
+        }
+      });
+    });
+  </script>
+</section>

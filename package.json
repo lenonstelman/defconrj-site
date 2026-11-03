@@ -1,0 +1,19 @@
+{
+  "name": "defcon-rio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Site oficial do DEF CON Rio de Janeiro (DCG5521)",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "dependencies": {
+    "astro": "^7.3.8"
+  }
+}

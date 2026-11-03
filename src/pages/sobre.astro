@@ -1,0 +1,336 @@
+---
+import Base from '../layouts/Base.astro';
+import CristoFrame from '../components/CristoFrame.astro';
+import site from '../data/site.json';
+
+/* ============================================================
+   DCG5521 — PÁGINA SOBRE (portado de components/dcg-soubre.tsx)
+   neofetch · dmesg · man page · config file · ps aux
+   ============================================================ */
+
+const DMESG_LOGS = [
+  { ts: '[2026.000]', sev: 'INFO', msg: 'kernel boot — DEF CON Group Rio de Janeiro initialized' },
+  { ts: '[2026.001]', sev: 'INFO', msg: 'mounting community filesystem at /mnt/hackers' },
+  { ts: '[2026.015]', sev: 'INFO', msg: 'first meetup planning — date and location pending' },
+  { ts: '[2026.045]', sev: 'INFO', msg: 'badge design subsystem loaded — selo oficial v1.0' },
+  { ts: '[2026.060]', sev: 'INFO', msg: 'CTF module activated — first competition announced' },
+  { ts: '[2026.090]', sev: 'WARN', msg: 'pizza supply critical — requesting community reinforcement' },
+  { ts: '[2026.120]', sev: 'INFO', msg: 'new member joined — curiosidade detectada, nível: máximo' },
+  { ts: '[NOW]', sev: 'INFO', msg: 'system ready — awaiting next event input' },
+];
+
+const PS_PROCESSES = [
+  { pid: '1337', cpu: '42.0', mem: '12.3', cmd: 'ctf', args: '--mode=jeopardy --difficulty=varied' },
+  { pid: '2048', cpu: '18.5', mem: '8.1', cmd: 'lockpicking', args: '--hands-on --beginner-friendly' },
+  { pid: '31337', cpu: '33.2', mem: '15.7', cmd: 'reversing', args: '--tools=ghidra,ida,binaryninja' },
+  { pid: '80211', cpu: '22.1', mem: '6.4', cmd: 'wireless', args: '--band=2.4,5.8 --sdr=enabled' },
+  { pid: '443', cpu: '28.7', mem: '10.2', cmd: 'websec', args: '--owasp-top10 --bugbounty=intro' },
+  { pid: '9090', cpu: '15.3', mem: '4.8', cmd: 'osint', args: '--frameworks=maltego,sherlock' },
+  { pid: '5555', cpu: '11.0', mem: '3.5', cmd: 'career', args: '--resume-review --interview-prep' },
+];
+
+const NEOFETCH = [
+  { label: 'OS', value: 'DEF CON Group Rio de Janeiro', dim: '' },
+  { label: 'Kernel', value: 'DCG5521', dim: '#1 SMP 2026' },
+  { label: 'Uptime', value: 'Since 2026', dim: '(fase inicial)' },
+  { label: 'Shell', value: 'bash', dim: '5.2.0' },
+  { label: 'Resolution', value: '-22.9068°S x -43.1729°W', dim: '' },
+  { label: 'DE', value: 'Terminal / Open Space', dim: '' },
+  { label: 'WM', value: 'Community-Driven', dim: '' },
+  { label: 'Theme', value: 'Hacker Culture', dim: '[dark]' },
+  { label: 'Icons', value: 'Smiley Skull', dim: 'v2.0' },
+  { label: 'Terminal', value: 'JetBrains Mono', dim: '' },
+  { label: 'CPU', value: 'Hackers', dim: '@ 100% comunidade' },
+  { label: 'GPU', value: 'Curiosity', dim: '@ max performance' },
+];
+---
+
+<Base
+  title="Sobre — DEF CON Rio de Janeiro (DCG5521)"
+  description="O que é o DEF CON Rio de Janeiro (DCG5521): um DEF CON Group carioca, gratuito e aberto — hackers, makers, estudantes e curiosos, um encontro por mês."
+>
+  <section class="sobre-section">
+    <div class="bg-scanlines" aria-hidden="true"></div>
+    <div class="bg-noise" aria-hidden="true"></div>
+
+    <div class="sobre-content">
+      {/* Header */}
+      <div class="sobre-header">
+        <div class="sobre-prompt">
+          <span class="p-user">root</span>@dcg5521:
+          <span class="p-path">~/about</span>${' '}
+          <span class="p-cmd">neofetch</span>
+        </div>
+        <h1 class="sobre-title" data-text="SOBRE O DEF CON RIO">SOBRE O DEF CON RIO</h1>
+      </div>
+
+      {/* NEOFETCH */}
+      <div class="neofetch-section">
+        <div class="neofetch-window">
+          <div class="win-titlebar">
+            <span class="win-dot r" aria-hidden="true"></span>
+            <span class="win-dot y" aria-hidden="true"></span>
+            <span class="win-dot g" aria-hidden="true"></span>
+            <span class="win-title">dcg5521@rio: neofetch</span>
+          </div>
+          <div class="nf-body">
+            <div class="nf-left">
+              <pre class="nf-ascii" aria-hidden="true"><span class="na-red">       ██████╗  ██████╗ ██████╗ 
+       ██╔══██╗██╔════╝██╔════╝ </span><span class="na-white">       ██║  ██║██║     ██║  ███╗
+       ██║  ██║██║     ██║   ██║</span><span class="na-red">
+       ██████╔╝╚██████╗╚██████╔╝
+       ╚═════╝  ╚═════╝ ╚═════╝ </span>
+            <span class="na-dim">DCG5521</span></pre>
+              <div class="nf-info">
+                {
+                  NEOFETCH.map((item) => (
+                    <div class="nf-line">
+                      <span class="nf-label">{item.label}</span>
+                      <span class="nf-value">
+                        {item.value}
+                        {item.dim && <span class="nf-value-dim"> {item.dim}</span>}
+                      </span>
+                    </div>
+                  ))
+                }
+                <div class="nf-line nf-line--extra">
+                  <span class="nf-label nf-label--dim">Memory</span>
+                  <span class="nf-value">
+                    Open Minds
+                    <span class="nf-bar" aria-hidden="true">
+                      <span class="nf-bar-fill"></span>
+                    </span>
+                  </span>
+                </div>
+                <div class="nf-line nf-line--extra">
+                  <span class="nf-label nf-label--dim">Motto</span>
+                  <span class="nf-value-dim">Hack. Learn. Share. Build the community.</span>
+                </div>
+              </div>
+            </div>
+            <CristoFrame />
+          </div>
+        </div>
+      </div>
+
+      {/* DMESG / Linha do tempo */}
+      <div class="timeline-section">
+        <div class="timeline-header">
+          <span class="tl-icon">$</span>
+          <span class="tl-title">LINHA DO TEMPO</span>
+        </div>
+        <div class="dmesg-window">
+          <div class="win-titlebar">
+            <span class="win-dot r" aria-hidden="true"></span>
+            <span class="win-dot y" aria-hidden="true"></span>
+            <span class="win-dot g" aria-hidden="true"></span>
+            <span class="win-title">dcg5521@rio: dmesg | grep dcg5521</span>
+          </div>
+          <div class="dmesg-body">
+            <div class="dmesg-prompt">
+              <span class="dp-user">root</span>@dcg5521:
+              <span class="dp-path">~/logs</span>${' '}
+              <span class="p-cmd">dmesg | tail -n 10</span>
+            </div>
+            {
+              DMESG_LOGS.map((log) => (
+                <div class="dmesg-log">
+                  <span class="dm-ts">{log.ts}</span>
+                  <span class={`dm-sev ${log.sev.toLowerCase()}`}>{log.sev}</span>
+                  <span class="dm-msg">
+                    <strong>dcg5521:</strong> {log.msg}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+          <div class="dmesg-footer">
+            root@dcg5521:~/logs$
+            <span class="df-cursor" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+
+      {/* MAN PAGE */}
+      <div class="manpage-section">
+        <div class="man-header-row">
+          <span class="mh-icon">$</span>
+          <span class="mh-title">O QUE É UM DEF CON GROUP</span>
+        </div>
+        <div class="man-page-box">
+          <div class="mp-header">
+            <span>DCG5521 Manual</span>
+            <span>DEFCON_GROUP(7)</span>
+            <span>2026</span>
+          </div>
+          <div class="mp-body">
+            <div class="mp-name">DEFCON_GROUP(7) — DCG5521 Community Manual</div>
+            <div class="mp-section">NAME</div>
+            <div class="mp-desc">
+              defcon_group — comunidade local de hackers e profissionais de
+              segurança da informação
+            </div>
+
+            <div class="mp-section">SYNOPSIS</div>
+            <div class="mp-desc">
+              defcon_group [ --meetup ] [ --workshop ] [ --ctf ] [ --community ]
+            </div>
+
+            <div class="mp-section">DESCRIPTION</div>
+            <div class="mp-desc">
+              DEF CON Groups são comunidades locais independentes, afiliadas à rede
+              global DEF CON. Não somos empresa, não vendemos curso, não cobramos
+              entrada. Reunimos hackers, profissionais de segurança, makers,
+              estudantes e curiosos em espaços abertos para trocar ideia, ver demo
+              ao vivo e hackear coisa junto.
+            </div>
+
+            <div class="mp-section">OPTIONS</div>
+            <ul class="mp-list">
+              <li>
+                <strong>--meetup</strong> — Encontro mensal presencial. Palestra
+                curta, demo ao vivo, mão na massa.
+              </li>
+              <li>
+                <strong>--workshop</strong> — Sessão prática com foco técnico. Lock
+                picking, SDR, reversing.
+              </li>
+              <li>
+                <strong>--ctf</strong> — Competição de segurança ofensiva em formato
+                jeopardy.
+              </li>
+              <li>
+                <strong>--community</strong> — Espaço aberto para networking sem
+                hierarquia.
+              </li>
+            </ul>
+
+            <div class="mp-section">SEE ALSO</div>
+            <div class="mp-desc">
+              <a
+                href="https://defcongroups.org"
+                class="mp-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                defcongroups.org
+              </a>{' '}
+              — rede mundial de DEF CON Groups
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CONTATO como ~/.config */}
+      <div class="contact-section">
+        <div class="contact-header">
+          <span class="ch-icon">$</span>
+          <span class="ch-title">PONTO DE CONTATO</span>
+        </div>
+        <div class="config-window">
+          <div class="win-titlebar">
+            <span class="win-dot r" aria-hidden="true"></span>
+            <span class="win-dot y" aria-hidden="true"></span>
+            <span class="win-dot g" aria-hidden="true"></span>
+            <span class="win-title">dcg5521@rio: cat ~/.config/dcg5521/contacts.conf</span>
+          </div>
+          <div class="config-body">
+            <div class="config-prompt">
+              <span class="cp-user">root</span>@dcg5521:
+              <span class="cp-path">~/.config/dcg5521</span>${' '}
+              <span class="p-cmd">cat contacts.conf</span>
+            </div>
+            <div class="config-file">
+              <div class="cf-comment"># PDC — Ponto de Contato</div>
+              <div class="cf-comment"># Status: canais oficiais centralizados em site.json</div>
+              <div class="cf-gap"></div>
+              <div>
+                <span class="cf-key">discord</span>=<span class="cf-val">"{site.links.discord || 'não configurado'}"</span>
+              </div>
+              <div>
+                <span class="cf-key">telegram</span>=<span class="cf-val">"{site.links.telegram || 'não configurado'}"</span>
+              </div>
+              <div>
+                <span class="cf-key">github</span>=<span class="cf-val">"{site.links.github || 'não configurado'}"</span>
+              </div>
+              <div>
+                <span class="cf-key">linkedin</span>=<span class="cf-val">"{site.links.linkedin || 'não configurado'}"</span>
+              </div>
+              <div>
+                <span class="cf-key">instagram</span>=<span class="cf-val">"{site.links.instagram || 'não configurado'}"</span>
+              </div>
+              <div>
+                <span class="cf-key">email</span>=<span class="cf-val">"{site.links.email || 'não configurado'}"</span>
+              </div>
+              <div class="cf-gap"></div>
+              <div class="cf-comment"># Handles ativos</div>
+              <div>
+                <span class="cf-key">handle_1</span>=<span class="cf-val">"@pessoa1"</span>
+              </div>
+              <div>
+                <span class="cf-key">handle_2</span>=<span class="cf-val">"@pessoa2"</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* O QUE ROLA como ps aux */}
+      <div class="process-section">
+        <div class="process-header">
+          <span class="ph-icon">$</span>
+          <span class="ph-title">O QUE ROLA</span>
+        </div>
+        <div class="ps-window">
+          <div class="win-titlebar">
+            <span class="win-dot r" aria-hidden="true"></span>
+            <span class="win-dot y" aria-hidden="true"></span>
+            <span class="win-dot g" aria-hidden="true"></span>
+            <span class="win-title">dcg5521@rio: ps aux | grep activity</span>
+          </div>
+          <div class="ps-body">
+            <div class="ps-prompt">
+              <span class="pp-user">root</span>@dcg5521:
+              <span class="pp-path">~</span>${' '}
+              <span class="p-cmd">ps aux | grep -i activity</span>
+            </div>
+            <table class="ps-table">
+              <thead>
+                <tr>
+                  <th>USER</th>
+                  <th>PID</th>
+                  <th>%CPU</th>
+                  <th>%MEM</th>
+                  <th>COMMAND</th>
+                  <th>ARGS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  PS_PROCESSES.map((proc) => (
+                    <tr>
+                      <td class="ps-user">dcg5521</td>
+                      <td class="ps-pid">{proc.pid}</td>
+                      <td class="ps-cpu">{proc.cpu}</td>
+                      <td class="ps-mem">{proc.mem}</td>
+                      <td class="ps-cmd">{proc.cmd}</td>
+                      <td class="ps-args">{proc.args}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Circuito */}
+      <div class="circuit-base" aria-hidden="true">
+        <div class="cb-line"></div>
+        <div class="cb-node" style="left: 25%"></div>
+        <div class="cb-node" style="left: 50%; animation-delay: 0.7s"></div>
+        <div class="cb-node" style="left: 75%; animation-delay: 1.4s"></div>
+      </div>
+    </div>
+  </section>
+</Base>

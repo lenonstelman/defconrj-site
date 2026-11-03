@@ -1,0 +1,381 @@
+---
+import site from '../data/site.json';
+
+const proximo = site.encontros[0];
+---
+
+<section class="hero" data-hero>
+  <canvas class="hero__canvas" data-hero-canvas aria-hidden="true"></canvas>
+  <div class="hero__veu" aria-hidden="true"></div>
+  <div class="hero__ruido" aria-hidden="true"></div>
+  <div class="hero__scanlines" aria-hidden="true"></div>
+
+  <div class="hero__conteudo container">
+    <p class="prompt hero__prompt">root@rio:~# ./bem-vindo.sh</p>
+    <h1
+      class="hero__titulo"
+      data-glitch
+      data-glitch-intensity="0.9"
+      data-glitch-frequency="80"
+    >DEF CON RIO</h1>
+    <p
+      class="hero__tag"
+      data-glitch
+      data-glitch-intensity="0.6"
+      data-glitch-frequency="150"
+    >DCG5521</p>
+    <p class="hero__sub">
+      &gt; HACKERS.MAKERS.CURIOSOS &lt;<br />
+      &gt; UM_ENCONTRO_POR_MÊS.ZERO_PRÉ_REQUISITO &lt;
+    </p>
+    <p class="hero__acoes">
+      <a class="btn hero__btn" href="#encontros">
+        &gt; PRÓXIMO_ENCONTRO: {proximo.data} &lt;
+      </a>
+      <a class="link-sec" href="/sobre">nunca participei →</a>
+    </p>
+    <p class="hero__nota">entrada gratuita · do n00b ao 1337 · traga seu notebook (ou não)</p>
+  </div>
+
+  <p class="hero__hud hero__hud--esq" aria-hidden="true">&gt; SYSTEM.ONLINE</p>
+  <p class="hero__hud hero__hud--dir" aria-hidden="true">-22.9068° S / -43.1729° W &lt;</p>
+  <div class="hero__scroll" aria-hidden="true"></div>
+</section>
+
+<script>
+  const hero = document.querySelector('[data-hero]');
+  const canvas = document.querySelector('[data-hero-canvas]');
+
+  const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Glitch de texto ----------
+  if (!reduzMovimento) {
+    const CHARS = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    document.querySelectorAll('[data-glitch]').forEach((el) => {
+      const original = el.textContent ?? '';
+      const intensidade = parseFloat(el.dataset.glitchIntensity ?? '0.8');
+      const frequencia = parseInt(el.dataset.glitchFrequency ?? '100', 10);
+
+      setInterval(() => {
+        if (Math.random() > 1 - intensidade * 0.05) {
+          el.textContent = original
+            .split('')
+            .map((c) =>
+              Math.random() > 1 - intensidade * 0.2
+                ? CHARS[Math.floor(Math.random() * CHARS.length)]
+                : c,
+            )
+            .join('');
+          setTimeout(
+            () => {
+              el.textContent = original;
+            },
+            50 + Math.random() * 100 * intensidade,
+          );
+        }
+      }, frequencia);
+    });
+  }
+
+  // ---------- Fundo WebGL (shader de distorção + partículas) ----------
+  const gl = canvas?.getContext('webgl', { alpha: false, antialias: false });
+
+  if (canvas && gl) {
+    const mouse = { x: 0, y: 0 };
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    function criarShader(tipo, fonte) {
+      const shader = gl.createShader(tipo);
+      gl.shaderSource(shader, fonte);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(shader));
+        return null;
+      }
+      return shader;
+    }
+
+    function criarPrograma(vs, fs) {
+      const prog = gl.createProgram();
+      gl.attachShader(prog, criarShader(gl.VERTEX_SHADER, vs));
+      gl.attachShader(prog, criarShader(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(prog);
+      return prog;
+    }
+
+    // ----- Programa 1: fundo com ruído distorcido -----
+    const vsFundo = `
+      attribute vec2 aPos;
+      varying vec2 vUv;
+      void main() {
+        vUv = aPos * 0.5 + 0.5;
+        gl_Position = vec4(aPos, 0.0, 1.0);
+      }
+    `;
+
+    const fsFundo = `
+      precision mediump float;
+      uniform float uTime;
+      uniform vec2 uMouse;
+      uniform vec2 uResolution;
+      uniform float uNoiseScale;
+      varying vec2 vUv;
+
+      float random(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+      }
+
+      float noise(vec2 st) {
+        vec2 i = floor(st);
+        vec2 f = fract(st);
+        float a = random(i);
+        float b = random(i + vec2(1.0, 0.0));
+        float c = random(i + vec2(0.0, 1.0));
+        float d = random(i + vec2(1.0, 1.0));
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+      }
+
+      float fbm(vec2 st) {
+        float value = 0.0;
+        float amplitude = 0.5;
+        for (int i = 0; i < 6; i++) {
+          value += amplitude * noise(st);
+          st *= 2.0;
+          amplitude *= 0.5;
+        }
+        return value;
+      }
+
+      vec3 distortedNoise(vec2 uv) {
+        vec2 st = uv * uNoiseScale;
+        float time = uTime * 0.5;
+        vec2 q = vec2(fbm(st + vec2(0.0, 0.0)),
+                      fbm(st + vec2(5.2, 1.3)));
+        vec2 r = vec2(fbm(st + 4.0 * q + vec2(1.7 - time * 0.15, 9.2)),
+                      fbm(st + 4.0 * q + vec2(8.3 - time * 0.126, 2.8)));
+        float f = fbm(st + r);
+
+        float mouseDistance = length(uv - (uMouse * 0.5 + 0.5));
+        float mouseEffect = 1.0 - smoothstep(0.0, 0.6, mouseDistance);
+
+        float glitch = step(0.98, random(vec2(floor(uTime * 10.0), floor(uv.y * 50.0))));
+        f += glitch * 0.3;
+
+        vec3 color = vec3(0.0);
+        color.r = f * f * f + 0.6 * f * f + 0.5 * f;
+        color.g = f * f * f * f + 0.4 * f * f + 0.2 * f;
+        color.b = f * f * f * f * f * f + 0.7 * f * f + 0.5 * f;
+
+        float noiseTexture = random(uv * 100.0 + time);
+        color += noiseTexture * 0.1;
+
+        color += mouseEffect * vec3(0.3, 0.1, 0.2);
+
+        float scanline = sin(uv.y * 800.0) * 0.04;
+        color += scanline;
+
+        return color;
+      }
+
+      void main() {
+        vec2 uv = vUv;
+        uv.x *= uResolution.x / uResolution.y;
+
+        float aberration = 0.005;
+        vec3 color;
+        color.r = distortedNoise(uv + vec2(aberration, 0.0)).r;
+        color.g = distortedNoise(uv).g;
+        color.b = distortedNoise(uv - vec2(aberration, 0.0)).b;
+
+        float grain = random(uv + uTime) * 0.1;
+        color += grain;
+
+        vec2 uvV = vUv;
+        float vignette = 1.0 - length(uvV - 0.5) * 1.2;
+        color *= vignette;
+
+        color = pow(color, vec3(1.2));
+        color *= 0.9;
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `;
+
+    const progFundo = criarPrograma(vsFundo, fsFundo);
+    const bufQuad = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufQuad);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 3, -1, -1, 3]),
+      gl.STATIC_DRAW,
+    );
+    const locFundo = {
+      aPos: gl.getAttribLocation(progFundo, 'aPos'),
+      uTime: gl.getUniformLocation(progFundo, 'uTime'),
+      uMouse: gl.getUniformLocation(progFundo, 'uMouse'),
+      uResolution: gl.getUniformLocation(progFundo, 'uResolution'),
+      uNoiseScale: gl.getUniformLocation(progFundo, 'uNoiseScale'),
+    };
+
+    // ----- Programa 2: partículas de ruído (vermelho/branco/ciano) -----
+    const vsPart = `
+      attribute vec3 aPosition;
+      attribute vec3 aColor;
+      attribute float aSize;
+      uniform float uDpr;
+      varying vec3 vColor;
+      void main() {
+        vColor = aColor;
+        gl_Position = vec4(aPosition, 1.0);
+        gl_PointSize = aSize * uDpr;
+      }
+    `;
+
+    const fsPart = `
+      precision mediump float;
+      varying vec3 vColor;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float alpha = smoothstep(0.5, 0.1, d) * 0.8;
+        gl_FragColor = vec4(vColor, alpha);
+      }
+    `;
+
+    const progPart = criarPrograma(vsPart, fsPart);
+
+    const NUM_PARTICULAS = 800;
+    const posicoes = new Float32Array(NUM_PARTICULAS * 3);
+    const cores = new Float32Array(NUM_PARTICULAS * 3);
+    const tamanhos = new Float32Array(NUM_PARTICULAS);
+
+    for (let i = 0; i < NUM_PARTICULAS; i++) {
+      const i3 = i * 3;
+      posicoes[i3] = (Math.random() - 0.5) * 2.4;
+      posicoes[i3 + 1] = (Math.random() - 0.5) * 2.4;
+      posicoes[i3 + 2] = 0;
+
+      const escolha = Math.random();
+      if (escolha < 0.33) {
+        cores[i3] = 0.949; cores[i3 + 1] = 0.188; cores[i3 + 2] = 0.259; // vermelho da marca
+      } else if (escolha < 0.66) {
+        cores[i3] = 1.0; cores[i3 + 1] = 1.0; cores[i3 + 2] = 1.0;
+      } else {
+        cores[i3] = 0.0; cores[i3 + 1] = 1.0; cores[i3 + 2] = 1.0;
+      }
+
+      tamanhos[i] = Math.random() * 2.5 + 1;
+    }
+
+    const bufPos = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+    gl.bufferData(gl.ARRAY_BUFFER, posicoes, gl.DYNAMIC_DRAW);
+
+    const bufCor = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufCor);
+    gl.bufferData(gl.ARRAY_BUFFER, cores, gl.STATIC_DRAW);
+
+    const bufTam = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufTam);
+    gl.bufferData(gl.ARRAY_BUFFER, tamanhos, gl.STATIC_DRAW);
+
+    const locPart = {
+      aPosition: gl.getAttribLocation(progPart, 'aPosition'),
+      aColor: gl.getAttribLocation(progPart, 'aColor'),
+      aSize: gl.getAttribLocation(progPart, 'aSize'),
+      uDpr: gl.getUniformLocation(progPart, 'uDpr'),
+    };
+
+    function redimensionar() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const { clientWidth: w, clientHeight: h } = canvas;
+      canvas.width = Math.max(1, Math.floor(w * dpr));
+      canvas.height = Math.max(1, Math.floor(h * dpr));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    redimensionar();
+    window.addEventListener('resize', redimensionar);
+
+    let visivel = true;
+    let rafId = 0;
+    const inicio = performance.now();
+
+    function desenhar(agora) {
+      const t = (agora - inicio) / 1000;
+
+      // Fundo
+      gl.useProgram(progFundo);
+      gl.bindBuffer(gl.ARRAY_BUFFER, bufQuad);
+      gl.enableVertexAttribArray(locFundo.aPos);
+      gl.vertexAttribPointer(locFundo.aPos, 2, gl.FLOAT, false, 0, 0);
+      gl.uniform1f(locFundo.uTime, t);
+      gl.uniform2f(locFundo.uMouse, mouse.x, -mouse.y);
+      gl.uniform2f(locFundo.uResolution, canvas.width, canvas.height);
+      gl.uniform1f(locFundo.uNoiseScale, 8.0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      // Partículas
+      for (let i = 0; i < NUM_PARTICULAS; i++) {
+        const i3 = i * 3;
+        posicoes[i3] += (Math.random() - 0.5) * 0.004;
+        posicoes[i3 + 1] += (Math.random() - 0.5) * 0.004;
+        posicoes[i3 + 1] += Math.sin(t * 3 + i * 0.1) * 0.0006;
+
+        const influencia =
+          1 / (1 + Math.abs(posicoes[i3] - mouse.x) + Math.abs(posicoes[i3 + 1] + mouse.y));
+        if (influencia > 0.3) {
+          posicoes[i3] += (Math.random() - 0.5) * 0.02;
+          posicoes[i3 + 1] += (Math.random() - 0.5) * 0.02;
+        }
+
+        if (Math.abs(posicoes[i3]) > 1.2) posicoes[i3] *= -0.8;
+        if (Math.abs(posicoes[i3 + 1]) > 1.2) posicoes[i3 + 1] *= -0.8;
+      }
+
+      gl.useProgram(progPart);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, posicoes);
+      gl.enableVertexAttribArray(locPart.aPosition);
+      gl.vertexAttribPointer(locPart.aPosition, 3, gl.FLOAT, false, 0, 0);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, bufCor);
+      gl.enableVertexAttribArray(locPart.aColor);
+      gl.vertexAttribPointer(locPart.aColor, 3, gl.FLOAT, false, 0, 0);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, bufTam);
+      gl.enableVertexAttribArray(locPart.aSize);
+      gl.vertexAttribPointer(locPart.aSize, 1, gl.FLOAT, false, 0, 0);
+
+      gl.uniform1f(locPart.uDpr, Math.min(window.devicePixelRatio || 1, 2));
+      gl.drawArrays(gl.POINTS, 0, NUM_PARTICULAS);
+      gl.disable(gl.BLEND);
+
+      if (!reduzMovimento && visivel) {
+        rafId = requestAnimationFrame(desenhar);
+      }
+    }
+
+    if (reduzMovimento) {
+      // Quadro estático para quem prefere movimento reduzido
+      desenhar(inicio + 4200);
+    } else {
+      const observer = new IntersectionObserver(([entrada]) => {
+        const estavaVisivel = visivel;
+        visivel = entrada.isIntersecting;
+        if (visivel && !estavaVisivel) {
+          rafId = requestAnimationFrame(desenhar);
+        } else if (!visivel) {
+          cancelAnimationFrame(rafId);
+        }
+      });
+      if (hero) observer.observe(hero);
+      rafId = requestAnimationFrame(desenhar);
+    }
+  }
+</script>

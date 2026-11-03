@@ -1,0 +1,179 @@
+---
+/* ============================================================
+   DCG5521 — CTA SECTION (portado de components/dcg5521-cta.tsx)
+   Typewriter headline · Matrix rain · Pizza counter
+   Botões: mantém o estilo HUD do site (.btn / .btn--ghost)
+   ============================================================ */
+import site from '../data/site.json';
+
+const { links } = site;
+const LINHA_1 = 'O ENCONTRO É GRATUITO.';
+const LINHA_2 = 'A PIZZA É NEGOCIÁVEL.';
+---
+
+<section class="cta-section" data-cta data-linha1={LINHA_1} data-linha2={LINHA_2}>
+  <canvas class="matrix-canvas" data-matrix aria-hidden="true"></canvas>
+  <div class="cta-scanlines" aria-hidden="true"></div>
+  <div class="cta-vignette" aria-hidden="true"></div>
+
+  <div class="cta-content">
+    <div class="cta-prompt">
+      <span class="p-user">root</span>@dcg5521:
+      <span class="p-path">~/join</span>${' '}
+      <span class="p-cmd">./motivational_speech.sh</span>
+    </div>
+
+    <h2 class="cta-headline" aria-label={`${LINHA_1} ${LINHA_2}`}>
+      <span class="line1" data-line1 aria-hidden="true"></span>
+      <span class="line2" data-line2 aria-hidden="true"></span>
+      <span class="cta-cursor" data-cta-cursor aria-hidden="true"></span>
+    </h2>
+
+    <div class="cta-counter">
+      pizzas_negociadas:{' '}
+      <span class="c-val" data-pizzas>0</span>
+      <span class="c-bar" aria-hidden="true">
+        <span class="c-bar-fill" data-pizzas-bar></span>
+      </span>
+      <span class="c-sep">|</span> status:{' '}
+      <span class="c-status">ABERTO</span>
+    </div>
+
+    <div class="cta-buttons">
+      {links.discord && <a href={links.discord} target="_blank" rel="noopener noreferrer" class="btn">Entrar no Discord</a>}
+      {links.telegram && <a href={links.telegram} target="_blank" rel="noopener noreferrer" class="btn btn--ghost">Entrar no Telegram</a>}
+    </div>
+
+    <div class="cta-footer">
+      root@dcg5521:~/join$
+      <span class="f-blink" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <script>
+    const secao = document.querySelector('[data-cta]');
+    const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (secao) {
+      const LINHA1 = secao.dataset.linha1 ?? '';
+      const LINHA2 = secao.dataset.linha2 ?? '';
+      const elLinha1 = secao.querySelector('[data-line1]');
+      const elLinha2 = secao.querySelector('[data-line2]');
+      const elCursor = secao.querySelector('[data-cta-cursor]');
+      const elPizzas = secao.querySelector('[data-pizzas]');
+      const elBarra = secao.querySelector('[data-pizzas-bar]');
+
+      if (reduzMovimento) {
+        // Estado final, sem animação
+        elLinha1.textContent = LINHA1;
+        elLinha2.textContent = LINHA2;
+        elCursor.classList.add('blink');
+      } else {
+        // ---------- Matrix rain ----------
+        const canvas = secao.querySelector('[data-matrix]');
+        const ctx = canvas?.getContext('2d');
+
+        if (canvas && ctx) {
+          const CHARS =
+            '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'.split('');
+          let w = 0,
+            h = 0,
+            cols = 0,
+            drops = [];
+          let raf = 0;
+          let rodando = false;
+
+          const redimensionar = () => {
+            const rect = canvas.getBoundingClientRect();
+            w = canvas.width = rect.width;
+            h = canvas.height = rect.height;
+            cols = Math.floor(w / 16);
+            drops = new Array(cols).fill(1);
+          };
+          redimensionar();
+          window.addEventListener('resize', redimensionar);
+
+          const desenhar = () => {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.07)';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(242, 48, 66, 0.22)';
+            ctx.font = '12px "JetBrains Mono", monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+              const ch = CHARS[Math.floor(Math.random() * CHARS.length)];
+              ctx.fillText(ch, i * 16, drops[i] * 16);
+              if (drops[i] * 16 > h && Math.random() > 0.975) drops[i] = 0;
+              drops[i]++;
+            }
+            if (rodando) raf = requestAnimationFrame(desenhar);
+          };
+
+          const observer = new IntersectionObserver(([entrada]) => {
+            if (entrada.isIntersecting && !rodando) {
+              rodando = true;
+              raf = requestAnimationFrame(desenhar);
+            } else if (!entrada.isIntersecting && rodando) {
+              rodando = false;
+              cancelAnimationFrame(raf);
+            }
+          });
+          observer.observe(secao);
+        }
+
+        // ---------- Typewriter + contador (disparam ao entrar na viewport) ----------
+        let iniciado = false;
+        const iniciar = () => {
+          if (iniciado) return;
+          iniciado = true;
+
+          // Typewriter
+          let fase = 0;
+          let idx = 0;
+          const tick = () => {
+            if (fase === 0) {
+              if (idx < LINHA1.length) {
+                elLinha1.textContent = LINHA1.slice(0, idx + 1);
+                idx++;
+                setTimeout(tick, 60 + Math.random() * 40);
+              } else {
+                fase = 1;
+                idx = 0;
+                setTimeout(tick, 400);
+              }
+            } else if (fase === 1) {
+              if (idx < LINHA2.length) {
+                elLinha2.textContent = LINHA2.slice(0, idx + 1);
+                idx++;
+                setTimeout(tick, 60 + Math.random() * 40);
+              } else {
+                elCursor.classList.add('blink');
+              }
+            }
+          };
+          setTimeout(tick, 600);
+
+          // Contador de pizzas
+          let pizzas = 0;
+          const contar = () => {
+            pizzas += Math.floor(Math.random() * 3) + 1;
+            elPizzas.textContent = String(pizzas);
+            elBarra.style.width = `${Math.min((pizzas / 200) * 100, 100)}%`;
+            setTimeout(contar, 2000 + Math.random() * 4000);
+          };
+          setTimeout(contar, 3000);
+        };
+
+        const observerInicio = new IntersectionObserver(
+          ([entrada]) => {
+            if (entrada.isIntersecting) {
+              iniciar();
+              observerInicio.disconnect();
+            }
+          },
+          { threshold: 0.3 },
+        );
+        observerInicio.observe(secao);
+      }
+    }
+  </script>
+</section>

@@ -1,0 +1,145 @@
+---
+/* ============================================================
+   DCG5521 — FEATURES v2 (portado de components/cards.txt)
+   Glitch monocromático · Cantos chanfrados · Sem borda lateral
+   ============================================================ */
+
+const FEATURES = [
+  {
+    id: 'talks',
+    title: 'TALKS & DEMOS',
+    body: 'Palestra curta, demo ao vivo, mão na massa. Do lock picking ao CTF, do SDR ao reversing.',
+    cmd: './ignite_talk.sh',
+    node: '01',
+  },
+  {
+    id: 'comunidade',
+    title: 'COMUNIDADE',
+    body: 'Quem trabalha com segurança, quem quer entrar, quem hackeia por hobby. Todo mundo na mesa.',
+    cmd: "whoami && grep -i 'hacker' /etc/group",
+    node: '02',
+  },
+  {
+    id: 'projetos',
+    title: 'PROJETOS',
+    body: 'Badges, ferramentas, CTFs próprios. Repositório aberto — manda um PR.',
+    cmd: 'git clone https://github.com/dcg5521',
+    node: '03',
+  },
+];
+---
+
+<section class="dcg-features-v2" data-features>
+  {/* Texturas de fundo */}
+  <div class="bg-noise" aria-hidden="true"></div>
+  <div class="bg-scanlines" aria-hidden="true"></div>
+
+  {/* Header */}
+  <header class="section-header">
+    <div class="header-terminal">
+      <span class="ht-prompt">root@rio:~# </span>
+      <span class="ht-cmd">cat /proc/features</span>
+      <span class="ht-cursor" aria-hidden="true">_</span>
+    </div>
+    <div class="header-divider">
+      <div class="hd-line"></div>
+      <span class="hd-label">O QUE FAZEMOS</span>
+      <div class="hd-line"></div>
+    </div>
+  </header>
+
+  {/* Grid */}
+  <div class="features-grid">
+    {
+      FEATURES.map((feat, i) => (
+        <div class="card-wrapper">
+          <div class={`circuit-connector c-${i}`} aria-hidden="true" />
+          <article class="feature-card" data-index={i}>
+            <span class="corner corner-tl" aria-hidden="true" />
+            <span class="corner corner-tr" aria-hidden="true" />
+            <span class="corner corner-bl" aria-hidden="true" />
+            <span class="corner corner-br" aria-hidden="true" />
+            <div class="card-scanline" aria-hidden="true" />
+            <div class="card-content">
+              <div class="node-indicator" aria-hidden="true">
+                <span class="node-dot" />
+                <span class="node-id">{feat.node}</span>
+              </div>
+              <div class="terminal-cmd-line">
+                <span class="t-prompt">root@rio:~# </span>
+                <span class="t-cmd" data-cmd={feat.cmd} />
+                <span class="t-cursor" aria-hidden="true">_</span>
+              </div>
+              <h2 class="glitch-mono" data-text={feat.title}>{feat.title}</h2>
+              <p class="card-body">{feat.body}</p>
+              <div class="card-meta">
+                <span class="coord">-22.9068° S / -43.1729° W</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      ))
+    }
+  </div>
+
+  {/* Circuito horizontal de base */}
+  <div class="circuit-base" aria-hidden="true">
+    <div class="cb-line"></div>
+    <div class="cb-node" style="left: 25%"></div>
+    <div class="cb-node" style="left: 50%; animation-delay: 0.7s"></div>
+    <div class="cb-node" style="left: 75%; animation-delay: 1.4s"></div>
+  </div>
+
+  {/* Glow de mouse */}
+  <div class="mouse-glow" aria-hidden="true"></div>
+</section>
+
+<script>
+  const secao = document.querySelector('[data-features]');
+  const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (secao) {
+    // ---------- Glow que segue o mouse ----------
+    if (!reduzMovimento) {
+      const glow = secao.querySelector('.mouse-glow');
+      secao.addEventListener('mousemove', (e) => {
+        const rect = secao.getBoundingClientRect();
+        glow.style.left = `${e.clientX - rect.left}px`;
+        glow.style.top = `${e.clientY - rect.top}px`;
+      });
+    }
+
+    // ---------- Digitação dos comandos de terminal ----------
+    const comandos = secao.querySelectorAll('.t-cmd');
+
+    if (reduzMovimento) {
+      comandos.forEach((el) => {
+        el.textContent = el.dataset.cmd ?? '';
+      });
+    } else {
+      const digitar = (el) => {
+        const texto = el.dataset.cmd ?? '';
+        let i = 0;
+        const timer = setInterval(() => {
+          i++;
+          el.textContent = texto.slice(0, i);
+          if (i >= texto.length) clearInterval(timer);
+        }, 20);
+      };
+
+      const observer = new IntersectionObserver(
+        (entradas, obs) => {
+          entradas.forEach((entrada) => {
+            if (entrada.isIntersecting) {
+              digitar(entrada.target);
+              obs.unobserve(entrada.target);
+            }
+          });
+        },
+        { threshold: 0.4 },
+      );
+
+      comandos.forEach((el) => observer.observe(el));
+    }
+  }
+</script>
